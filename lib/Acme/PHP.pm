@@ -18,29 +18,51 @@ BEGIN{
     my $flag = 0;
 
     while (my $line = <$fh>) {
-        $line =~ s/'/\'/g;
+        if ($line =~ /(.*)<\?perl(.*)\?>(.*)/) {
+            my $html1 = $1;
+            my $perl = $2;
+            my $html2 = $3;
 
-        if ($line =~ /(.*)<perl>(.*)<\/perl>(.*)/) {
-            $code .= "print '$1';\n$2\nprint '$3';\n";
+            $html1 =~ s/\'/\\\'/g;
+            $html2 =~ s/\'/\\\'/g;
+
+            $code .= "print '$html1';\n$perl\nprint '$html2';\n";
             next;
         }
 
-        if ($line =~ /(.*)<perl>(.*)/) {
+        if ($line =~ /(.*)<\?perl(.*)/) {
             $flag = 1;
-            $code .= "print '$1';\n$2\n";
+
+            my $html = $1;
+            my $perl = $2;
+
+            $html =~ s/\'/\\\'/g;
+
+            $code .= "print '$html';\n$perl\n";
             next;
         }
 
-        if ($line =~ /(.*)<\/perl>(.*)/) {
+        if ($line =~ /(.*)\?>(.*)/) {
             $flag = 0;
-            $code .= "$1;\nprint '$2';\n";
+
+            my $perl = $1;
+            my $html = $2;
+
+            $html =~ s/\'/\\\'/g;
+
+            $code .= "$perl;\nprint '$html';\n";
             next;
         }
 
         if ($flag) {
-            $code .= "$line\n";
+            my $perl = $line;
+            $code .= "$perl\n";
         } else {
-            $code .= "print '$line';\n";
+            my $html = $line;
+
+            $html =~ s/\'/\\\'/g;
+
+            $code .= "print '$html';\n";
         }
     }
 
