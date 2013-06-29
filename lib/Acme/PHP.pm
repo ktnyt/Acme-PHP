@@ -18,6 +18,8 @@ BEGIN{
     my $flag = 0;
 
     while (my $line = <$fh>) {
+        $line =~ s/'/\'/g;
+
         if ($line =~ /(.*)<perl>(.*)<\/perl>(.*)/) {
             $code .= "print '$1';\n$2\nprint '$3';\n";
             next;
