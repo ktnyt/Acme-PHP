@@ -14,10 +14,12 @@ BEGIN{
     print "Content-type: text/html\n\n";
 
     open my $fh, "<", $0;
-    my $code;
-    my $flag = 0;
+    my $code = "";
+    my $flag = 1;
 
     while (my $line = <$fh>) {
+        $flag = 0 if $line =~ /<html>/;
+
         if ($line =~ /(.*)<\?perl(.*)\?>(.*)/) {
             my $html1 = $1;
             my $perl = $2;
@@ -64,6 +66,8 @@ BEGIN{
 
             $code .= "print '$html';\n";
         }
+
+        $flag = 1 if $line =~ /<\/html>/;
     }
 
     eval $code;
